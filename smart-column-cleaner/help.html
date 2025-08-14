@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Setup · Smart Column Cleaner — Tech Speckles</title>
+  <title>Help & FAQ · Smart Column Cleaner — Tech Speckles</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Setup instructions for Smart Column Cleaner in Google Sheets." />
+  <meta name="description" content="How to use Smart Column Cleaner in Google Sheets: tools, duplicate modes, quotas, and troubleshooting." />
   <link rel="stylesheet" href="/assets/site.css" />
   <link rel="stylesheet" href="/smart-column-cleaner/style.css" />
   <link rel="icon" type="image/png" sizes="48x48" href="/smart-column-cleaner/img/logo-48.png" />
   <link rel="icon" type="image/png" sizes="128x128" href="/smart-column-cleaner/img/logo-128.png" />
-  <meta property="og:title" content="Setup · Smart Column Cleaner" />
-  <meta property="og:description" content="How to install and grant permissions." />
+  <meta property="og:title" content="Help & FAQ · Smart Column Cleaner" />
+  <meta property="og:description" content="Tools, duplicate modes, quotas, and troubleshooting." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#14B8A6" />
 </head>
@@ -27,7 +27,7 @@
       <h1>Tech Speckles</h1>
     </a>
     <nav>
-      <a href="/smart-column-cleaner/help.html">Help</a>
+      <a href="/smart-column-cleaner/help.html" aria-current="page">Help</a>
       <a href="/smart-column-cleaner/support.html">Support</a>
       <a href="/smart-column-cleaner/report-issue.html">Report issue</a>
       <a href="/smart-column-cleaner/privacy.html">Privacy</a>
@@ -37,16 +37,35 @@
 </header>
 
 <main id="main" class="wrap">
-  <h1>Setup & Installation</h1>
-  <ol>
-    <li>Open any Google Sheet → <b>Extensions → Add-ons → Get add-ons</b> and search for <b>Smart Column Cleaner</b>, or open the Marketplace listing directly.</li>
-    <li>Click <b>Install</b> and grant requested permissions.</li>
-    <li>In your Sheet: <b>Extensions → Smart Column Cleaner → Open Cleaner</b>.</li>
-    <li>(Optional) Click <b>(change)</b> next to <i>Duplicate mode</i> to set how duplicates are handled.</li>
-  </ol>
-  <div class="note">
-    <b>Permissions:</b> The add-on needs access to the active spreadsheet to read/write selected cells and store lightweight settings in document properties. It also reads your Google account email to check license status.
-  </div>
+  <h1>Help & FAQ</h1>
+
+  <h2>Tools</h2>
+  <ul>
+    <li><b>De-Duplicate Cells (by Column):</b> select one column → removes/marks duplicates based on mode.</li>
+    <li><b>Clear Duplicates Within Each Row:</b> select 2+ adjacent columns.</li>
+    <li><b>Trim Whitespace:</b> removes leading/trailing spaces.</li>
+    <li><b>Change Case:</b> lowercase / UPPERCASE / Proper Case.</li>
+    <li><b>Remove Non-ASCII:</b> removes emojis and non-ASCII characters.</li>
+  </ul>
+
+  <h2>Duplicate modes</h2>
+  <ul>
+    <li><b>blank</b> – set duplicates to empty.</li>
+    <li><b>highlight</b> – keep values and mark duplicates pink.</li>
+    <li><b>shift-cell</b> – remove duplicates and shift values up/left to close gaps.</li>
+  </ul>
+
+  <h2>Quota & Pro</h2>
+  <p>Free tier allows cleaning up to <b>300 cells/day</b>. Pro users have no daily limit.</p>
+
+  <h2>Troubleshooting</h2>
+  <ul>
+    <li>“Select exactly one column” → your selection must be a single column.</li>
+    <li>“No duplicates found” → try removing extra spaces first using Trim.</li>
+    <li>Connection lost → close and reopen the sidebar.</li>
+  </ul>
+
+  <p class="note">Need more help? See <a class="link-strong" href="/smart-column-cleaner/support.html">Support</a>.</p>
 </main>
 
 <footer>

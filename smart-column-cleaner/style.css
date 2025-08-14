@@ -1,13 +1,10 @@
-:root{--max:820px;--pad:20px;--accent:#1a73e8}
-*{box-sizing:border-box}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;margin:0;color:#111}
-.header{border-bottom:1px solid #eee;background:#fff}
-.wrap{max-width:var(--max);margin:0 auto;padding:var(--pad)}
-nav a{margin-right:12px;color:var(--accent);text-decoration:none}
-h1{font-size:28px;margin:.2em 0 .4em}
-h2{font-size:20px;margin:1.2em 0 .4em}
-.notice{background:#f6fafe;border:1px solid #e3f0ff;padding:10px 12px;border-radius:8px}
-.btn{display:inline-block;border:1px solid var(--accent);padding:8px 12px;border-radius:8px;color:#fff;background:var(--accent);text-decoration:none}
-footer{border-top:1px solid #eee;margin-top:32px;font-size:13px;color:#555}
-.small{font-size:13px;color:#555}
-ul{padding-left:22px}
+
+/* Product hero image utility */
+.hero-img {
+  width: 100%;
+  max-width: 320px;        /* smaller for logos */
+  margin: 20px auto;       /* center horizontally */
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: block;
+}

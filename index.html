@@ -1,26 +1,167 @@
-<!doctype html>
+
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tech Speckles</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; line-height: 1.6; }
-      header { padding: 4rem 1rem; text-align: center; }
-      h1 { margin: 0 0 .5rem; }
-      main { max-width: 760px; margin: 0 auto; padding: 0 1rem 3rem; }
-      a { text-decoration: none; }
-    </style>
-  </head>
-  <body>
-    <header>
-      <h1>Tech Speckles</h1>
-      <p>My very first GitHub Pages site 🎉</p>
-    </header>
-    <main>
-      <h2>Hello!</h2>
-      <p>This is a simple static page served from a public repo in an organization.</p>
-      <p>Edit <code>index.html</code> in the repo to update this page.</p>
-    </main>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <title>Tech Speckles — Small, sharp tools for Google Sheets</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Tech Speckles builds small, sharp tools that save time at work. Simple, privacy-friendly utilities with clear outcomes.">
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header>
+  <div class="wrap brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: var(--accent)">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".12"/>
+      <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <h1>Tech Speckles</h1>
+    <nav>
+      <a href="#products">Products</a>
+      <a href="#advantages">Advantages</a>
+      <a href="#roadmap">Roadmap</a>
+      <a href="#support">Support</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <h2>Small, sharp tools that do one job well</h2>
+    <p>
+      Focused utilities that make everyday work faster.
+      Simple to use, privacy-friendly, and built for clear outcomes.
+    </p>
+    <p>
+      The current focus is Google Sheets:
+      <a class="link-strong" href="/smart-column-cleaner/">Smart Column Cleaner</a>
+      (de-dup, trim, case change, emoji removal).
+    </p>
+    <p class="note">
+      Have an idea for a tiny tool that would save you hours each week?
+      <a id="featureLink" href="#">Request a feature by email</a>.
+    </p>
+  </section>
+
+  <section id="products" class="wrap">
+    <h2>Products</h2>
+    <div class="grid">
+      <article class="card">
+        <h3><a class="link-strong" href="/smart-column-cleaner/">Smart Column Cleaner</a></h3>
+        <p>De-duplicate cells (keep first / highlight / shift-left), clear row-wise duplicates, trim whitespace, change case, and remove non-ASCII/emoji — all inside Google Sheets.</p>
+        <p class="muted">
+          Free plan: clean up to 300 cells/day. Pro removes limits.
+          <a href="/smart-column-cleaner/help.html">Help & FAQ</a> ·
+          <a href="/smart-column-cleaner/privacy.html">Privacy</a> ·
+          <a href="/smart-column-cleaner/tos.html">Terms</a>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section id="why" class="wrap split">
+    <div>
+      <h2>Advantages</h2>
+      <h3>Privacy-first</h3>
+      <p>Data is processed entirely within Google’s infrastructure. No external servers are used. Settings are stored as lightweight document properties.</p>
+
+      <h3>Simple by design</h3>
+      <p>Each tool does one job really well. Clear copy, sensible defaults, minimal clicks.</p>
+
+      <h3>Fast support</h3>
+      <p>Responses are typically provided within one business day (IST). A sheet snippet or step list helps ensure quick reproduction of issues.</p>
+    </div>
+    <div>
+      <h2>For teams</h2>
+      <ul>
+        <li>Easy install via Google Workspace Marketplace.</li>
+        <li>No domain-wide admin config required.</li>
+        <li>Clear licensing: free daily quota, Pro via Marketplace.</li>
+        <li>Compatible with shared drives and standard Sheets permissions.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="roadmap" class="wrap">
+    <h2>Roadmap</h2>
+    <p class="muted">Lightweight tools we’re exploring next (subject to feedback):</p>
+    <ul>
+      <li>QR Code generator for Docs/Slides/Sheets (batch & branding options).</li>
+      <li>Email validator for Sheets (syntax, MX, and role-account detection).</li>
+      <li>Find & Replace+ with presets and safe preview.</li>
+    </ul>
+    <p>What should come first:
+      <a id="voteLink" href="#">request or vote by email</a>.
+    </p>
+  </section>
+
+  <section id="support" class="wrap">
+    <h2>Support & SLA</h2>
+    <ul>
+      <li>Self-serve docs: <a href="/smart-column-cleaner/help.html">Help & FAQ</a></li>
+      <li>Report a bug: <a href="/smart-column-cleaner/report-issue.html">Report issue</a></li>
+      <li>Email support: <a href="mailto:support@techspeckles.com">support@techspeckles.com</a> (target: <span class="muted">reply within 1 business day, IST</span>)</li>
+    </ul>
+  </section>
+
+  <section id="contact" class="wrap">
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:hello@techspeckles.com">hello@techspeckles.com</a></p>
+    <p class="muted">For privacy questions: <a href="mailto:privacy@techspeckles.com">privacy@techspeckles.com</a></p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap small">© <span id="y"></span> Tech Speckles. All rights reserved.</div>
+</footer>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Mailto helpers (works on GitHub Pages; no backend needed)
+  function openMail(to, subject, bodyLines){
+    const s = encodeURIComponent(subject);
+    const b = encodeURIComponent(bodyLines.filter(Boolean).join('\n'));
+    window.location.href = `mailto:${to}?subject=${s}&body=${b}`;
+  }
+  document.getElementById('featureLink').addEventListener('click', function(e){
+    e.preventDefault();
+    openMail(
+      'support@techspeckles.com',
+      'Feature / Tool Request',
+      [
+        'Hi Tech Speckles,',
+        '',
+        'I would like to request a new tool/feature.',
+        'Problem / workflow:',
+        '',
+        'Example data / steps:',
+        '',
+        'Priority (nice-to-have / urgent):',
+        '',
+        'Thanks,',
+        ''
+      ]
+    );
+  });
+  document.getElementById('voteLink').addEventListener('click', function(e){
+    e.preventDefault();
+    openMail(
+      'support@techspeckles.com',
+      'Roadmap vote / suggestion',
+      [
+        'I would like to vote for / suggest:',
+        '- QR / Email validator / Find & Replace+ / Other: _____',
+        '',
+        'Why it matters:',
+        '',
+        'Team size / use case:',
+        ''
+      ]
+    );
+  });
+</script>
+</body>
 </html>
+

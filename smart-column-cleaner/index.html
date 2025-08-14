@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Smart Column Cleaner · Google Sheets add‑on — Tech Speckles</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Fast de‑dup, trim, case change and emoji removal for Google Sheets." />
+
+  <!-- Shared site styles -->
+  <link rel="stylesheet" href="/assets/site.css" />
+  <link rel="stylesheet" href="/smart-column-cleaner/style.css" />
+
+  <!-- Icons & social -->
+  <link rel="icon" type="image/png" sizes="48x48" href="/smart-column-cleaner/img/logo-48.png" />
+  <link rel="icon" type="image/png" sizes="128x128" href="/smart-column-cleaner/img/logo-128.png" />
+  <meta property="og:title" content="Smart Column Cleaner" />
+  <meta property="og:description" content="Fast de‑dup, trim, case change and emoji removal for Google Sheets." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/smart-column-cleaner/img/banner-220x140.png" />
+  <meta name="theme-color" content="#14B8A6" />
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header>
+  <div class="wrap brand">
+    <a href="/" aria-label="Back to Tech Speckles home" class="brand-link" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: var(--accent)">
+        <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".12"/>
+        <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>Tech Speckles</h1>
+    </a>
+    <nav>
+      <a href="/smart-column-cleaner/help.html">Help</a>
+      <a href="/smart-column-cleaner/support.html">Support</a>
+      <a href="/smart-column-cleaner/report-issue.html">Report issue</a>
+      <a href="/smart-column-cleaner/privacy.html">Privacy</a>
+      <a href="/smart-column-cleaner/tos.html">Terms</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <section class="hero">
+    <h1 style="display:flex; align-items:center; gap:10px; margin:.2em 0 .4em;">
+      <img src="/smart-column-cleaner/img/logo-48.png" alt="" width="28" height="28" style="border-radius:6px;opacity:.9;flex:0 0 auto;">
+      <span>Smart Column Cleaner</span>
+    </h1>
+    <p class="notice">
+      Clean messy sheets in seconds: <b>De‑duplicate</b>, <b>Trim whitespace</b>, <b>Change case</b>, and remove <b>Non‑ASCII/emoji</b>.
+      Everything runs inside Google—no external servers.
+    </p>
+
+    <!-- Calmer CTAs: prominent links instead of big buttons -->
+    <p style="margin:16px 0">
+      <a class="link-strong" href="#" aria-label="Install from Google Workspace Marketplace">Install from Google Workspace Marketplace</a>
+      &nbsp;·&nbsp;
+      <a class="link-muted" href="/smart-column-cleaner/help.html">View Help &amp; FAQ</a>
+    </p>
+
+    <!-- Product hero image (large logo with soft glow works nicely as a hero) -->
+    <!--img class="hero-img" src="/smart-column-cleaner/img/logo-1024.png" alt="Smart Column Cleaner logo" /-->
+  </section>
+
+  <h2>Features</h2>
+  <ul>
+    <li><b>De‑Duplicate Cells (by column)</b> — keep first, blank/highlight, or shift-left.</li>
+    <li><b>Clear Duplicates within Row</b> — remove duplicates across selected columns.</li>
+    <li><b>Trim whitespace</b> — removes leading/trailing spaces.</li>
+    <li><b>Change case</b> — lowercase / UPPERCASE / Proper Case.</li>
+    <li><b>Remove Non‑ASCII</b> — strip emojis and odd symbols.</li>
+  </ul>
+
+  <h2>How it works</h2>
+  <ol>
+    <li>Open a Google Sheet → <b>Extensions → Smart Column Cleaner → Open Cleaner</b>.</li>
+    <li>(Optional) Click <i>(change)</i> to choose your duplicate mode.</li>
+    <li>Select a range/column and run a tool.</li>
+  </ol>
+
+  <h2>Privacy &amp; pricing</h2>
+  <p class="small">
+    Free plan: clean up to <b>300 cells/day</b>. Pro plan removes limits.
+    The add‑on processes data only within your Google account and stores lightweight settings in document properties.
+    See <a href="/smart-column-cleaner/privacy.html">Privacy</a> and <a href="/smart-column-cleaner/tos.html">Terms</a>.
+  </p>
+</main>
+
+<footer>
+  <div class="wrap small">
+    © <span id="y"></span> Tech Speckles. All rights reserved. ·
+    <a href="/smart-column-cleaner/privacy.html">Privacy</a> ·
+    <a href="/smart-column-cleaner/tos.html">Terms</a>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
+

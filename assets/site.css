@@ -1,0 +1,115 @@
+/* /assets/site.css  —  shared styling for all pages (home + product) */
+
+/* ── Design tokens */
+:root{
+  --max: 980px;
+  --pad: 22px;
+
+  /* Brand (Teal) */
+  --accent: #14B8A6;             /* Teal 600 */
+  --accent-soft: rgba(13,148,136,.55);
+  --accent-hover: #0A7C70;
+
+  /* Surface */
+  --border: #eee;
+  --text:   #111;
+  --muted:  #666;
+
+  /* Notice */
+  --notice-bg: #f6fafe;
+  --notice-br: #e3f0ff;
+  --notice-fg: #27496d;
+}
+
+/* ── Base & layout */
+*{ box-sizing: border-box; }
+html, body{ height: 100%; }
+body{
+  margin:0; color:var(--text); background:#fff;
+  font: 15.5px/1.65 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+.wrap{ max-width: var(--max); margin: 0 auto; padding: var(--pad); }
+header, footer{ border-block: 1px solid var(--border); background:#fff; }
+
+/* Skip link for a11y */
+.skip{ position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+.skip:focus{ position:static; width:auto; height:auto; display:inline-block; margin:8px; }
+
+/* ── Typography */
+h1{ font-size:28px; margin:.2em 0 .4em; }
+h2{ font-size:22px; margin:26px 0 10px; }
+h3{ font-size:18px; margin:18px 0 8px; }
+.small, .muted{ color:var(--muted); }
+.muted{ font-size: .96em; }
+
+/* ── Links (neutral text + colored underline) */
+a{
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--accent-soft);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+a:hover{ text-decoration-color: var(--accent-hover); }
+a:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Stronger link for CTAs (use instead of big buttons) */
+a.link-strong{
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+a.link-strong:hover{
+  text-decoration-thickness: 4px;
+  text-decoration-color: var(--accent-hover);
+}
+a.link-muted{
+  text-decoration-color: var(--accent-soft);
+}
+
+/* ── Header brand & nav (shared) */
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand h1{ font-size:20px; margin:0; }
+.brand a{ text-decoration: none; } /* logo/title link has no underline */
+
+nav{ margin-left:auto; display:flex; gap:14px; }
+nav a{ color:#444; text-decoration: none; }
+nav a:hover{
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--accent);
+}
+nav a[aria-current="page"]{
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 4px;
+  text-underline-offset: 3px;
+}
+
+/* ── Components */
+.note, .notice{
+  background: var(--notice-bg);
+  border: 1px solid var(--notice-br);
+  color: var(--notice-fg);
+  padding:10px 12px;
+  border-radius:8px;
+}
+
+/* Optional small pill/button (if needed later) */
+.btn{
+  display:inline-block; border:1px solid var(--accent);
+  padding:6px 10px; border-radius:8px;
+  color:#fff; background:var(--accent);
+  text-decoration:none;
+  font-size: 14px; line-height: 1.3;
+}
+.btn.secondary{ background:#fff; color:var(--accent); }
+
+/* Responsive helpers */
+.hero{ padding-block: 26px; }
+.grid{ display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); }
+.card{ border:1px solid var(--border); border-radius:12px; padding:16px; }
+.card h3{ margin:0 0 6px; }
+.card p{ margin:0 0 8px; color:#555; }
+.split{ display:grid; gap:16px; grid-template-columns:1.2fr 1fr; }
+@media (max-width: 860px){ .split{ grid-template-columns:1fr; } }
