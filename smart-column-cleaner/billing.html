@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Smart Column Cleaner — Billing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- PayPal JS SDK: Subscriptions require vault + intent=subscription -->
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_SANDBOX_CLIENT_ID&vault=true&intent=subscription&currency=USD" defer></script>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:720px;margin:24px auto;padding:0 16px}
+    .card{border:1px solid #eee;border-radius:12px;padding:16px;margin:16px 0}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .muted{color:#666}
+    button{padding:.6rem 1rem;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
+    #paypal-wrapper[hidden]{display:none}
+  </style>
+</head>
+<body>
+  <h1>Smart Column Cleaner — Billing</h1>
+
+  <div class="card">
+    <div class="row">
+      <span id="auth-state" class="muted">Not signed in</span>
+      <button id="signin">Sign in with Google</button>
+      <button id="signout" style="display:none">Sign out</button>
+    </div>
+    <div id="user-info" class="muted"></div>
+  </div>
+
+  <div class="card">
+    <h2>Pro Subscription</h2>
+    <p class="muted">USD monthly • cancel anytime.</p>
+    <div id="status" class="muted">Status: checking…</div>
+    <div id="paypal-wrapper" hidden>
+      <div id="paypal-button-container"></div>
+      <p class="muted" id="post-approve" style="display:none">
+        Thanks! If you saw the PayPal approval screen, your license will activate after we receive the webhook.
+      </p>
+    </div>
+  </div>
+
+  <script type="module">
+    // --- Firebase v9+ modular CDN (you can paste your v12 snippet as-is) ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    // 🔧 Paste your Firebase config here (public)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAB6FwjjGUHgEzzvKWBEUhGuKSw2EqxgsY",
+      authDomain: "smart-column-cleaner.firebaseapp.com",
+      projectId: "smart-column-cleaner",
+      storageBucket: "smart-column-cleaner.firebasestorage.app",
+      messagingSenderId: "811367949945",
+      appId: "1:811367949945:web:738a1cf1aefc4c670716a8",
+      measurementId: "G-JDGM6N0KTX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const signinBtn  = document.getElementById('signin');
+    const signoutBtn = document.getElementById('signout');
+    const authState  = document.getElementById('auth-state');
+    const userInfo   = document.getElementById('user-info');
+    const statusEl   = document.getElementById('status');
+    const ppWrap     = document.getElementById('paypal-wrapper');
+    const postApprove= document.getElementById('post-approve');
+
+    // Your deployed Cloud Function (getLicense)
+    const GET_LICENSE_URL = "https://us-central1-smart-column-cleaner.cloudfunctions.net/getLicense";
+
+    // Your PayPal plan id (sandbox) and return/cancel URLs
+    const PLAN_ID = "P-26W65311SF933182ANCQC7WA";
+    const RETURN_URL = "https://techspeckles.com/smart-column-cleaner/success.html";
+    const CANCEL_URL = "https://techspeckles.com/smart-column-cleaner/cancel.html";
+
+    async function refreshStatus(user) {
+      try {
+        if (!user) { statusEl.textContent = "Status: free (not signed in)"; return; }
+        const idToken = await user.getIdToken();
+        const r = await fetch(GET_LICENSE_URL, { headers: { Authorization: `Bearer ${idToken}` }});
+        const data = await r.json();
+        statusEl.textContent = `Status: ${data.status || 'free'} (${data.plan || 'free'})`;
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = "Status: error while checking";
+      }
+    }
+
+    signinBtn.onclick  = () => signInWithPopup(auth, provider); // Popup is fine on desktop. :contentReference[oaicite:2]{index=2}
+    signoutBtn.onclick = () => signOut(auth);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        authState.textContent = "Signed in";
+        signinBtn.style.display = "none";
+        signoutBtn.style.display = "inline-block";
+        userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
+        ppWrap.hidden = false;
+        await refreshStatus(user);
+
+        // Render PayPal buttons once (after SDK loads and user is known)
+        if (window.paypal && !window.__ppRendered) {
+          window.__ppRendered = true;
+          paypal.Buttons({
+            createSubscription: function (data, actions) {
+              // This object is passed directly to Subscriptions API; we set custom_id = uid. :contentReference[oaicite:3]{index=3}
+              return actions.subscription.create({
+                plan_id: PLAN_ID,
+                custom_id: user.uid,
+                application_context: { // still supported; sets redirects after approval. :contentReference[oaicite:4]{index=4}
+                  return_url: RETURN_URL,
+                  cancel_url: CANCEL_URL,
+                  user_action: "SUBSCRIBE_NOW"
+                }
+              });
+            },
+            onApprove: function (data, actions) {
+              console.log("Approved:", data); // data.subscriptionID is the sub id
+              postApprove.style.display = "block";
+              // License will flip to Pro after Step 4 (webhook processing).
+            },
+            onError: function (err) {
+              console.error("PayPal error", err);
+              alert("PayPal error: " + err);
+            }
+          }).render('#paypal-button-container'); // Renders the button. :contentReference[oaicite:5]{index=5}
+        }
+      } else {
+        authState.textContent = "Not signed in";
+        signinBtn.style.display = "inline-block";
+        signoutBtn.style.display = "none";
+        userInfo.textContent = "";
+        ppWrap.hidden = true;
+        await refreshStatus(null);
+      }
+    });
+  </script>
+</body>
+</html>
