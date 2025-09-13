@@ -136,11 +136,9 @@
           ppWrap.hidden = true;
           return;
         }
-        console.log('user: ', user);
         const idToken = await user.getIdToken();
         const r = await fetch(GET_LICENSE_URL, { headers: { Authorization: `Bearer ${idToken}` }});
         const data = await r.json();
-        console.log('License data: ', data);
         const plan = (data.plan || 'free').toLowerCase();
         const statusTxt = data.status || (plan === 'free' ? 'free' : 'active');
         statusEl.textContent = `Status: ${statusTxt} (${plan})`;
