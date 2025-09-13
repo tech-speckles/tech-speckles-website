@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- PayPal JS SDK: Subscriptions require vault + intent=subscription -->
   <script src="https://www.paypal.com/sdk/js?client-id=AQ82RXGFlVlFt1cy74T1QMDBm3lIhnFrzIBpqFFqGuxjiSvmXLkfjQmiUqioQtILYGiaBMtI26KHIYSw&vault=true&intent=subscription" data-sdk-integration-source="button-factory" defer></script>
+
+  <!-- Shared site styles -->
+  <link rel="stylesheet" href="/assets/site.css" />
+  <link rel="stylesheet" href="/smart-column-cleaner/style.css" />
+
   <style>
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:720px;margin:24px auto;padding:0 16px}
     .card{border:1px solid #eee;border-radius:12px;padding:16px;margin:16px 0}
@@ -13,9 +18,38 @@
     .muted{color:#666}
     button{padding:.6rem 1rem;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
     #paypal-wrapper[hidden]{display:none}
+
+    /* New: tidy header area inside Pro card */
+    .pro-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .price{color:#333;font-size:.95rem}
+    .pill{font-size:.85rem;padding:2px 10px;border-radius:999px;border:1px solid #e5e7eb;background:#f3f4f6;color:#374151}
+    .pill.pro{background:#e8f7ee;border-color:#b6e5c6;color:#026e2d}
+    .pill.free{background:#f3f4f6;border-color:#e5e7eb;color:#374151}
+    .meta a.as-link{font-size:.9rem;text-decoration:underline}
   </style>
+
 </head>
 <body>
+
+  <header>
+    <div class="wrap brand">
+      <a href="/" aria-label="Back to Tech Speckles home" class="brand-link" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: var(--accent)">
+          <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".12"/>
+          <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>Tech Speckles</h1>
+      </a>
+      <nav>
+        <a href="/smart-column-cleaner/help.html">Help</a>
+        <a href="/smart-column-cleaner/support.html">Support</a>
+        <a href="/smart-column-cleaner/privacy.html">Privacy</a>
+        <a href="/smart-column-cleaner/tos.html">Terms</a>
+      </nav>
+    </div>
+  </header>
+
   <h1>Smart Column Cleaner — Billing</h1>
 
   <div class="card">
@@ -27,10 +61,26 @@
     <div id="user-info" class="muted"></div>
   </div>
 
-  <div class="card">
-    <h2>Pro Subscription</h2>
-    <p class="muted">USD monthly • cancel anytime.</p>
-    <div id="status" class="muted">Status: checking…</div>
+  <div class="card" id="pro-card">
+    <div class="pro-head">
+      <h2 style="margin:0">Pro Subscription</h2>
+      <div class="meta">
+        <span class="price">USD monthly • cancel anytime.</span>
+        <span id="status" class="pill free" aria-live="polite">Status: checking…</span>
+        <a id="manageLink" class="as-link" href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noopener" hidden>Manage</a>
+      </div>
+    </div>
+
+    <ul class="small" style="margin-top:12px">
+      <li>Unlimited cells per day (Free is 300/day).</li>
+      <li>Cancel anytime; changes take effect at next renewal.</li>
+      <li>Data stays inside your Google account; we don’t export your sheet data.</li>
+    </ul>
+    <p class="small muted" style="margin-top:8px">
+      Need help? <a href="/smart-column-cleaner/support.html">Contact support</a>.
+      Read our <a href="/smart-column-cleaner/privacy.html">Privacy</a> and <a href="/smart-column-cleaner/tos.html">Terms</a>.
+    </p>
+
     <div id="paypal-wrapper" hidden>
       <div id="paypal-button-container"></div>
       <p class="muted" id="post-approve" style="display:none">
@@ -66,6 +116,7 @@
     const statusEl   = document.getElementById('status');
     const ppWrap     = document.getElementById('paypal-wrapper');
     const postApprove= document.getElementById('post-approve');
+    const manageLink = document.getElementById('manageLink');
 
     // Your deployed Cloud Function (getLicense)
     const GET_LICENSE_URL = "https://getlicense-2dsvjh67hq-uc.a.run.app";
@@ -77,16 +128,42 @@
 
     async function refreshStatus(user) {
       try {
-        if (!user) { statusEl.textContent = "Status: free (not signed in)"; return; }
+        if (!user) {
+          statusEl.textContent = "Status: free (not signed in)";
+          statusEl.className = "pill free";
+          manageLink.hidden = true;
+          // When not signed in, don't show PayPal yet (forces sign-in first)
+          ppWrap.hidden = true;
+          return;
+        }
+
         const idToken = await user.getIdToken();
         const r = await fetch(GET_LICENSE_URL, { headers: { Authorization: `Bearer ${idToken}` }});
         const data = await r.json();
-        statusEl.textContent = `Status: ${data.status || 'free'} (${data.plan || 'free'})`;
+
+        const plan = (data.plan || 'free').toLowerCase();
+        const statusTxt = data.status || (plan === 'free' ? 'free' : 'active');
+        statusEl.textContent = `Status: ${statusTxt} (${plan})`;
+
+        if (plan !== 'free') {
+          statusEl.className = "pill pro";
+          manageLink.hidden = false;
+          ppWrap.hidden = true;   // Hide PayPal button if already Pro
+        } else {
+          statusEl.className = "pill free";
+          manageLink.hidden = true;
+          ppWrap.hidden = false;  // Show button for Free users (once signed in)
+        }
       } catch (e) {
         console.error(e);
         statusEl.textContent = "Status: error while checking";
+        statusEl.className = "pill free";
+        manageLink.hidden = true;
+        // Keep PayPal visible so they can try to subscribe even if status check failed
+        ppWrap.hidden = !user;
       }
     }
+
 
     signinBtn.onclick  = () => signInWithPopup(auth, provider); // Popup is fine on desktop. :contentReference[oaicite:2]{index=2}
     signoutBtn.onclick = () => signOut(auth);
@@ -97,7 +174,7 @@
         signinBtn.style.display = "none";
         signoutBtn.style.display = "inline-block";
         userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
-        ppWrap.hidden = false;
+
         await refreshStatus(user);
 
         // Render PayPal buttons once (after SDK loads and user is known)
@@ -105,11 +182,10 @@
           window.__ppRendered = true;
           paypal.Buttons({
             createSubscription: function (data, actions) {
-              // This object is passed directly to Subscriptions API; we set custom_id = uid. :contentReference[oaicite:3]{index=3}
               return actions.subscription.create({
                 plan_id: PLAN_ID,
                 custom_id: user.uid,
-                application_context: { // still supported; sets redirects after approval. :contentReference[oaicite:4]{index=4}
+                application_context: {
                   return_url: RETURN_URL,
                   cancel_url: CANCEL_URL,
                   user_action: "SUBSCRIBE_NOW"
@@ -117,25 +193,26 @@
               });
             },
             onApprove: function (data, actions) {
-              console.log("Approved:", data); // data.subscriptionID is the sub id
+              console.log("Approved:", data);
               postApprove.style.display = "block";
-              // License will flip to Pro after Step 4 (webhook processing).
+              // Webhook will update Firestore; user can click "Refresh" by reloading or toggling auth.
             },
             onError: function (err) {
               console.error("PayPal error", err);
               alert("PayPal error: " + err);
             }
-          }).render('#paypal-button-container'); // Renders the button. :contentReference[oaicite:5]{index=5}
+          }).render('#paypal-button-container');
         }
+
       } else {
         authState.textContent = "Not signed in";
         signinBtn.style.display = "inline-block";
         signoutBtn.style.display = "none";
         userInfo.textContent = "";
-        ppWrap.hidden = true;
         await refreshStatus(null);
       }
     });
+
   </script>
 </body>
 </html>
