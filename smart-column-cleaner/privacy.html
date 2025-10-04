@@ -38,7 +38,7 @@
 
 <main id="main" class="wrap">
   <h1>Privacy Policy (Smart Column Cleaner) — Tech Speckles</h1>
-  <p>Last updated: <strong>2025-08-11</strong></p>
+  <p>Last updated: <strong>2025-10-04</strong></p>
 
   <h2>Overview</h2>
   <p><b>Smart Column Cleaner</b> is a Google Sheets add-on by Tech Speckles. It processes only
@@ -47,26 +47,40 @@
 
   <h2>Data we access and process</h2>
   <ul>
-    <li><b>Sheet data:</b> values in your selected range to execute the chosen clean-up action.</li>
-    <li><b>User email:</b> read from your Google account to check license status via Google’s Marketplace licensing (“LicensingApp”).</li>
-    <li><b>Document properties:</b> we store lightweight settings in the current spreadsheet (e.g., duplicate-mode) and a daily usage counter to enforce the free quota.</li>
+    <li><b>Sheet data (in your current spreadsheet only):</b> values in the user-selected range in order to perform the chosen clean-up action (e.g., trim whitespace, change case, remove non-ASCII, de-duplicate). We do not copy this data to our servers.</li>
+    <li><b>Add-on usage metadata:</b> a per-day usage counter and lightweight settings (e.g., chosen mode) stored in the current spreadsheet’s <i>Document Properties</i> to enforce the free quota and remember preferences.</li>
+    <li><b>License/check signals:</b> when you initiate a paid-tier action, the add-on sends a Google-signed ID token or a Firebase authentication token plus a one-time operation ID to our license/quota endpoints to validate plan status and consume quota. No spreadsheet content is sent.</li>
   </ul>
 
   <h2>What we <i>don’t</i> do</h2>
   <ul>
-    <li>No external servers: data isn’t sent to or stored on Tech Speckles servers.</li>
-    <li>No advertising or sale of data.</li>
+    <li>No transfer of spreadsheet cell contents to Tech Speckles servers. All cleaning happens inside Google Sheets.</li>
+    <li>No advertising, selling, or renting of your data.</li>
     <li>No access to files outside the active spreadsheet.</li>
   </ul>
 
+  <h2>Where data flows</h2>
+  <ul>
+    <li><b>Google infrastructure:</b> the add-on runs inside Google Apps Script within your account’s permissions.</li>
+    <li><b>Tech Speckles license/quota API:</b> HTTPS calls to our Cloud Run endpoints are used to validate license status and enforce quotas (no sheet content).</li>
+    <li><b>Firebase (sidebar sign-in):</b> we may use Firebase Authentication in the sidebar UI to help identify your plan status. The sidebar loads the official Firebase SDK from Google.</li>
+    <li><b>Payments:</b> subscriptions are handled by PayPal; Tech Speckles does not receive your card or bank details.</li>
+  </ul>
+
   <h2>Retention</h2>
-  <p>Settings and counters are stored in the spreadsheet’s <i>Document Properties</i>.
-  Daily counters reset each day; you may delete properties by copying content to a new
-  spreadsheet or via Google Apps Script.</p>
+  <ul>
+    <li><b>Spreadsheet properties:</b> usage counters reset daily; you can remove them by copying data to a new sheet or via Apps Script.</li>
+    <li><b>Server logs (license/quota API):</b> minimal request logs (timestamp, operation ID, token claims, result) are retained for up to 30 days for fraud prevention and troubleshooting.</li>
+    <li><b>Payments:</b> PayPal maintains your subscription records per its own policies; Tech Speckles does not store payment instrument data.</li>
+  </ul>
+
 
   <h2>Security</h2>
-  <p>All processing occurs within Google’s infrastructure under your account permissions.
-  Licensing is verified using Google Workspace Marketplace systems.</p>
+  <p>All spreadsheet processing occurs inside Google’s infrastructure under least-privilege scopes. Communication with our license/quota API uses HTTPS. We follow access controls and logging on our Cloud Run services and never transmit spreadsheet cell data to our servers.</p>
+
+  <h2>Children’s privacy</h2>
+  <p>The Service is not directed to children under 13. If you believe a child has provided personal information, contact us and we will delete it.</p>
+
 
   <h2>Your choices</h2>
   <ul>
@@ -75,7 +89,7 @@
   </ul>
 
   <h2>Contact</h2>
-  <p>Email: <a href="mailto:hello@techspeckles.com">hello@techspeckles.com</a></p>
+  <p>Email: <a href="mailto:support@techspeckles.com">support@techspeckles.com</a></p>
 </main>
 
 <footer>
