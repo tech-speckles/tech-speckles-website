@@ -56,10 +56,20 @@
 
   <h2>Duplicate modes</h2>
   <ul>
-    <li><b>blank</b> – set duplicates to empty.</li>
-    <li><b>highlight</b> – keep values and mark duplicates pink.</li>
-    <li><b>shift-cell</b> – remove duplicates and shift values up/left to close gaps.</li>
+    <li><b>blank</b> – set duplicate cells to empty.</li>
+    <li><b>highlight</b> – keep values and mark duplicate cells pink.</li>
+    <li><b>remove rows</b> – keep the first occurrence and move later duplicate rows to a new sheet (“Removed by SCC — …”).</li>
   </ul>
+
+  <div class="options-note">
+    <strong>Options:</strong>
+    <ul>
+      <li><b>Header row keep</b> — when Row&nbsp;1 is in your selection, it isn’t compared or changed.</li>
+      <li><b>Ignore blank keys</b> — empty/whitespace-only keys are skipped (not treated as duplicates).</li>
+      <li><b>Case-insensitive + trim</b> — values are compared after trimming spaces and lower-casing.</li>
+    </ul>
+    <small>These apply to both <i>De-Duplicate Cells (by column)</i> and <i>Clear Duplicates within Row</i>.</small>
+  </div>
 
   <h2>Quota & Pro</h2>
   <p>Free tier allows cleaning up to <b>300 cells/day</b>. Pro users have no daily limit.</p>
