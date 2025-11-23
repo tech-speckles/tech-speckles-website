@@ -44,10 +44,10 @@
     /* Bottom CTA layout */
     .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     /* small lock icon on CTA when paying */
-    .icon-lock{display:inline-block;margin-left:6px;opacity:.85;transform:translateY(1px)}
-    /* compact copy buttons + code pills */
-    .btn-compact{padding:4px 8px;font-size:.85rem} code{background:#f6f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:2px 6px}
-
+    .icon-lock{
+      display:inline-block; margin-left:6px; opacity:.85;
+      transform: translateY(1px);
+    }
   </style>
 </head>
 <body>
@@ -139,15 +139,6 @@
       <p class="small muted" id="plan-hint" style="margin-top:8px"></p>
     </section>
 
-    <!-- Support-only details (shown when signed in) -->
-    <details id="support-info" class="small" style="margin-top:8px" hidden>
-      <summary>Support info</summary>
-      <div class="muted" style="margin-top:6px">
-        <div>Account ID: <code id="uid"></code> <button id="copy-uid" class="btn secondary btn-compact" type="button">Copy</button></div>
-        <div id="sub-id-wrap" style="margin-top:4px; display:none">Subscription ID: <code id="sub-id"></code> <button id="copy-sub-id" class="btn secondary btn-compact" type="button">Copy</button></div>
-      </div>
-    </details>
-
     <!-- PayPal actions -->
     <div id="paypal-wrapper" hidden style="margin-top:8px">
       <div id="paypal-button-container"></div>
@@ -231,14 +222,6 @@
   const ctaMsg     = document.getElementById('cta-msg');
   const ctaSub     = document.getElementById('cta-sub');
   const ctaBtn     = document.getElementById('cta-btn');
-
-  // Support info refs
-  const supportDetails = document.getElementById('support-info');
-  const uidEl          = document.getElementById('uid');
-  const copyUidBtn     = document.getElementById('copy-uid');
-  const subIdWrap      = document.getElementById('sub-id-wrap');
-  const subIdEl        = document.getElementById('sub-id');
-  const copySubIdBtn   = document.getElementById('copy-sub-id');
 
   // Functions URL
   const GET_LICENSE_URL = "https://getlicense-2dsvjh67hq-uc.a.run.app";
@@ -375,17 +358,6 @@
 
       // Signed in → check license
       const data    = await fetchLicense(user);
-
-      // Show Support info (always when signed in)
-      if (supportDetails) { supportDetails.hidden = false; supportDetails.open = true; }
-
-      if (uidEl) uidEl.textContent = user.uid;
-      if (subIdWrap) {
-        const subId = data && (data.subscriptionId || data.subId || data.subscription_id);
-        if (subId) { subIdEl.textContent = subId; subIdWrap.style.display = 'block'; }
-        else { subIdEl.textContent = ''; subIdWrap.style.display = 'none'; }
-      }
-
       const plan    = String(data.plan || 'free').toLowerCase();   // 'free' | 'pro'
       const cadence = String(data.planCadence || '').toLowerCase();
       const statusTxt = data.status || (plan === 'free' ? 'free' : 'active');
@@ -442,13 +414,6 @@
       planHint.textContent = "Select a plan to continue.";
       const isSignedIn = !!user;
       ppWrap.hidden = !isSignedIn;
-
-      if (supportDetails) { supportDetails.hidden = !isSignedIn; supportDetails.open = isSignedIn; }
-      if (!isSignedIn) {
-        if (uidEl) uidEl.textContent = '';
-        if (subIdWrap) { subIdEl.textContent = ''; subIdWrap.style.display = 'none'; }
-      }
-
       if (isSignedIn) {
         await onPaypalReady().catch(()=>{});
         renderPaypalButtons(user);
@@ -505,7 +470,7 @@
       if (authState)  authState.textContent = "Signed in";
       if (signinBtn)  signinBtn.style.display = "none";
       if (signoutBtn) signoutBtn.style.display = "inline-block";
-      if (userInfo)   userInfo.textContent = `${user.displayName || user.email}`;
+      if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
 
       await refreshStatus(user);
     } else {
@@ -513,25 +478,10 @@
       if (signinBtn)  signinBtn.style.display = "inline-block";
       if (signoutBtn) signoutBtn.style.display = "none";
       if (userInfo)   userInfo.textContent = "";
-      if (supportDetails) { supportDetails.hidden = true; supportDetails.open = false; }
 
       await refreshStatus(null);
     }
   });
-
-  // Copy handlers for Support info
-  if (copyUidBtn) {
-    copyUidBtn.onclick = async () => {
-      try { await navigator.clipboard.writeText(uidEl?.textContent || ''); copyUidBtn.textContent = 'Copied'; setTimeout(()=>copyUidBtn.textContent='Copy', 1200); }
-      catch { alert('Could not copy Account ID'); }
-    };
-  }
-  if (copySubIdBtn) {
-    copySubIdBtn.onclick = async () => {
-      try { await navigator.clipboard.writeText(subIdEl?.textContent || ''); copySubIdBtn.textContent = 'Copied'; setTimeout(()=>copySubIdBtn.textContent='Copy', 1200); }
-      catch { alert('Could not copy Subscription ID'); }
-    };
-  }
 
   // Bottom CTA actions
   ctaBtn.onclick = async () => {
