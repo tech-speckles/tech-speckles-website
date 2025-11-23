@@ -43,6 +43,11 @@
 
     /* Bottom CTA layout */
     .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    /* small lock icon on CTA when paying */
+    .icon-lock{
+      display:inline-block; margin-left:6px; opacity:.85;
+      transform: translateY(1px);
+    }
   </style>
 </head>
 <body>
@@ -93,10 +98,13 @@
       <h2 id="sub-title" style="margin:0">Subscription</h2>
       <div class="meta">
         <span id="status" class="pill free" aria-live="polite">Status: checking…</span>
-        <span id="user-email" class="small muted" aria-live="polite" style="margin-left:8px"></span>
         <a id="refreshLink" class="small" href="#" aria-label="Refresh status">Refresh</a>
         <a id="manageLink" class="small" href="https://www.paypal.com/myaccount/autopay/" target="_blank" rel="noopener" hidden>Manage on PayPal</a>
+        <button id="signout" class="btn secondary" type="button" style="display:none">Sign out</button>
       </div>
+      <div id="user-info" class="muted small" style="margin-top:4px"></div>
+     </div>
+
     </div>
 
     <div id="next-bill" class="muted small" aria-live="polite" style="margin-top:6px"></div>
@@ -187,14 +195,13 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // DOM refs (top Account card is optional now)
+  // DOM refs (top Account card is optional/absent now)
   const signinBtn   = document.getElementById('signin') || null;
   const signoutBtn  = document.getElementById('signout') || null;
   const authState   = document.getElementById('auth-state') || null;
   const userInfo    = document.getElementById('user-info') || null;
 
   const statusEl    = document.getElementById('status');
-  const userEmailEl = document.getElementById('user-email') || null;
   const refreshLink = document.getElementById('refreshLink');
   const manageLink  = document.getElementById('manageLink');
   const nextBill    = document.getElementById('next-bill');
@@ -311,7 +318,12 @@
     bottomCta.style.display = visible ? 'block' : 'none';
     if (!visible) return;
     ctaBtn.dataset.action = action;     // 'signin' | 'pay' | 'manage'
-    ctaBtn.textContent    = btnText || 'Continue';
+    // Add a small lock icon when proceeding to PayPal
+    if (action === 'pay') {
+      ctaBtn.innerHTML = (btnText || 'Continue to PayPal') + ' <span class="icon-lock" aria-hidden="true">🔒</span>';
+    } else {
+      ctaBtn.textContent = btnText || 'Continue';
+    }
     ctaMsg.textContent    = msg || '';
     ctaSub.textContent    = sub || '';
   }
@@ -461,7 +473,6 @@
       if (signinBtn)  signinBtn.style.display = "none";
       if (signoutBtn) signoutBtn.style.display = "inline-block";
       if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
-      if (userEmailEl) userEmailEl.textContent = `• ${user.email || user.displayName || ''}`;
 
       await refreshStatus(user);
     } else {
@@ -469,7 +480,6 @@
       if (signinBtn)  signinBtn.style.display = "inline-block";
       if (signoutBtn) signoutBtn.style.display = "none";
       if (userInfo)   userInfo.textContent = "";
-      if (userEmailEl) userEmailEl.textContent = "";   // clear when signed out
 
       await refreshStatus(null);
     }
