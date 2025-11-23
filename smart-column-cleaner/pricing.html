@@ -256,6 +256,20 @@
   function selectedPlanId(){
     return planYearlyRadio.checked ? PLAN_ID_YEARLY : PLAN_ID_MONTHLY;
   }
+  // Render identity line: default shows a button; click reveals UID inline
+  function renderUserInfo(user, opts = {}) {
+    if (!userInfo) return;
+    const showUid = !!opts.showUid;
+    const name = user.displayName || user.email || user.uid;
+    if (showUid) {
+      userInfo.textContent = `${name} — uid: ${user.uid}`;
+    } else {
+      userInfo.innerHTML =
+        `${name} <button id="show-uid" class="btn secondary" type="button" style="margin-left:8px">Show UID</button>`;
+      const btn = document.getElementById('show-uid');
+      btn && btn.addEventListener('click', () => renderUserInfo(user, { showUid: true }));
+    }
+  }
   function preferYearlyDefault(){
     // default Yearly selected (nudge); change to monthly if you prefer
     planYearlyRadio.checked = true;
@@ -470,7 +484,8 @@
       if (authState)  authState.textContent = "Signed in";
       if (signinBtn)  signinBtn.style.display = "none";
       if (signoutBtn) signoutBtn.style.display = "inline-block";
-      if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
+      // if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
+      renderUserInfo(user, { showUid: false });
 
       await refreshStatus(user);
     } else {
