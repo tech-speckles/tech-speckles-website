@@ -103,7 +103,6 @@
         <button id="signout" class="btn secondary" type="button" style="display:none">Sign out</button>
       </div>
       <div id="user-info" class="muted small" style="margin-top:4px"></div>
-     </div>
 
     </div>
 
@@ -378,7 +377,8 @@
       const data    = await fetchLicense(user);
 
       // Show Support info (always when signed in)
-      if (supportDetails) supportDetails.hidden = false;
+      if (supportDetails) { supportDetails.hidden = false; supportDetails.open = true; }
+
       if (uidEl) uidEl.textContent = user.uid;
       if (subIdWrap) {
         const subId = data && (data.subscriptionId || data.subId || data.subscription_id);
@@ -443,7 +443,7 @@
       const isSignedIn = !!user;
       ppWrap.hidden = !isSignedIn;
 
-      if (supportDetails) supportDetails.hidden = !isSignedIn;
+      if (supportDetails) { supportDetails.hidden = !isSignedIn; supportDetails.open = isSignedIn; }
       if (!isSignedIn) {
         if (uidEl) uidEl.textContent = '';
         if (subIdWrap) { subIdEl.textContent = ''; subIdWrap.style.display = 'none'; }
@@ -513,6 +513,7 @@
       if (signinBtn)  signinBtn.style.display = "inline-block";
       if (signoutBtn) signoutBtn.style.display = "none";
       if (userInfo)   userInfo.textContent = "";
+      if (supportDetails) { supportDetails.hidden = true; supportDetails.open = false; }
 
       await refreshStatus(null);
     }
