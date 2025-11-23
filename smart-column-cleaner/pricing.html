@@ -40,6 +40,9 @@
 
     /* Hideable wrapper */
     #paypal-wrapper[hidden]{display:none}
+
+    /* Bottom CTA layout */
+    .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   </style>
 </head>
 <body>
@@ -74,7 +77,7 @@
   <h1>Smart Column Cleaner — Pricing</h1>
 
   <!-- Sign-in card -->
-  <div class="card" aria-labelledby="auth-title">
+  <!--div class="card" aria-labelledby="auth-title">
     <h2 id="auth-title" class="small" style="margin:0 0 8px">Account</h2>
     <div class="meta" style="margin-top:2px">
       <span id="auth-state" class="muted">Not signed in</span>
@@ -82,7 +85,7 @@
       <button id="signout" class="btn secondary" type="button" style="display:none">Sign out</button>
     </div>
     <div id="user-info" class="muted" style="margin-top:6px"></div>
-  </div>
+  </div-->
 
   <!-- Subscription status + actions -->
   <div class="card" id="pro-card" aria-labelledby="sub-title">
@@ -135,9 +138,19 @@
         Thanks! Activating your license… this usually takes under a minute. If not updated, click <strong>Refresh</strong>.
       </p>
     </div>
-    <p id="signin-hint" class="muted small" style="margin-top:6px;display:none">
-      Please sign in to continue with PayPal.
-    </p>
+
+    <!-- Bottom CTA (shows a single clear next step) -->
+    <div id="bottom-cta" class="card small" style="margin-top:10px; padding:10px; display:none">
+      <div class="cta">
+        <div>
+          <strong id="cta-msg">Sign in to purchase with PayPal.</strong>
+          <div class="muted" id="cta-sub" style="margin-top:4px">
+            You’ll choose a plan above and pay securely on PayPal.
+          </div>
+        </div>
+        <button id="cta-btn" class="btn primary" type="button" data-action="signin">Sign in &amp; continue</button>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -172,17 +185,17 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // DOM refs
-  const signinBtn   = document.getElementById('signin');
-  const signoutBtn  = document.getElementById('signout');
-  const authState   = document.getElementById('auth-state');
-  const userInfo    = document.getElementById('user-info');
+  // DOM refs (top Account card is optional now)
+  const signinBtn   = document.getElementById('signin') || null;
+  const signoutBtn  = document.getElementById('signout') || null;
+  const authState   = document.getElementById('auth-state') || null;
+  const userInfo    = document.getElementById('user-info') || null;
+
   const statusEl    = document.getElementById('status');
   const refreshLink = document.getElementById('refreshLink');
   const manageLink  = document.getElementById('manageLink');
   const nextBill    = document.getElementById('next-bill');
   const planHint    = document.getElementById('plan-hint');
-  const signinHint  = document.getElementById('signin-hint');
   const ppWrap      = document.getElementById('paypal-wrapper');
   const postApprove = document.getElementById('post-approve');
   const paypalContainer = document.getElementById('paypal-button-container');
@@ -195,6 +208,12 @@
 
   const planMonthlyRadio = document.getElementById('plan-monthly');
   const planYearlyRadio  = document.getElementById('plan-yearly');
+
+  // Bottom CTA refs
+  const bottomCta  = document.getElementById('bottom-cta');
+  const ctaMsg     = document.getElementById('cta-msg');
+  const ctaSub     = document.getElementById('cta-sub');
+  const ctaBtn     = document.getElementById('cta-btn');
 
   // Functions URL
   const GET_LICENSE_URL = "https://getlicense-2dsvjh67hq-uc.a.run.app";
@@ -213,7 +232,7 @@
 
   // --- Helpers
   function parseUSD(str){
-      // "$2.99 / month" -> 2.99
+    // "$2.99 / month" -> 2.99
     const m = String(str).match(/([\d.]+)/);
     return m ? parseFloat(m[1]) : NaN;
   }
@@ -284,75 +303,145 @@
     return r.ok ? r.json() : { plan:'free' };
   }
 
+  // One clear CTA at the bottom
+  function showBottomCta({ visible, action, msg, sub, btnText }){
+    bottomCta.style.display = visible ? 'block' : 'none';
+    if (!visible) return;
+    ctaBtn.dataset.action = action;     // 'signin' | 'pay' | 'manage'
+    ctaBtn.textContent    = btnText || 'Continue';
+    ctaMsg.textContent    = msg || '';
+    ctaSub.textContent    = sub || '';
+  }
+
   async function refreshStatus(user){
     try{
+      // Always show a neutral plan hint (no mixed sign-in text)
+      const setNeutralPlanHint = () => {
+        const { pct } = computeYearlySavings(PRICE_MONTHLY, PRICE_YEARLY);
+        planHint.textContent = isFinite(pct) && pct > 0
+          ? `Tip: Yearly saves about ${pct}% vs monthly.`
+          : `Select a plan to continue.`;
+      };
+
       if (!user){
+        // Not signed in → clear single CTA
         statusEl.textContent = "Status: free (not signed in)";
-        statusEl.className = "pill free";
-        manageLink.hidden = true;
+        statusEl.className   = "pill free";
+        manageLink.hidden    = true;
         nextBill.textContent = "";
-        planHint.textContent = "Sign in to purchase. You’ll choose a plan and pay with PayPal.";
-        signinHint.style.display = "block";
-        ppWrap.hidden = true;
+        setNeutralPlanHint();
+
+        ppWrap.hidden = true; // hide PayPal buttons
+        showBottomCta({
+          visible: true,
+          action: 'signin',
+          msg: "Sign in to purchase with PayPal.",
+          sub: "You’ll choose a plan above and pay securely on PayPal.",
+          btnText: "Sign in & continue"
+        });
+
         return { plan:'free' };
       }
 
-      const data = await fetchLicense(user);
-      const plan      = String(data.plan || 'free').toLowerCase(); // 'free' | 'pro'
-      const cadence   = String(data.planCadence || '').toLowerCase(); // 'monthly' | 'yearly' | ''
+      // Signed in → check license
+      const data    = await fetchLicense(user);
+      const plan    = String(data.plan || 'free').toLowerCase();   // 'free' | 'pro'
+      const cadence = String(data.planCadence || '').toLowerCase();
       const statusTxt = data.status || (plan === 'free' ? 'free' : 'active');
       const labelCad  = cadence ? ` — Pro (${cadence[0].toUpperCase()}${cadence.slice(1)})` : (plan !== 'free' ? ' — Pro' : '');
       statusEl.textContent = `Status: ${statusTxt}${labelCad}`;
 
       if (plan !== 'free'){
-        statusEl.className = "pill pro";
-        manageLink.hidden = false;
-        signinHint.style.display = "none";
-        if (data.periodEnd){
-          const d = new Date(data.periodEnd);
-          nextBill.textContent = `Next bill: ${d.toLocaleDateString()} (local time)`;
-        } else {
-          nextBill.textContent = "";
-        }
+        // Already Pro
+        statusEl.className   = "pill pro";
+        manageLink.hidden    = false;
+        nextBill.textContent = data.periodEnd ? `Next bill: ${new Date(data.periodEnd).toLocaleDateString()} (local time)` : "";
+
         planHint.textContent = "Already Pro. To change plans, cancel in PayPal, then subscribe to the other plan.";
-        ppWrap.hidden = true; // already Pro → hide payment UI
-      } else {
-        statusEl.className = "pill free";
-        manageLink.hidden = true;
-        nextBill.textContent = "";
-        planHint.textContent = "You can switch plans any time later (cancel in PayPal, then subscribe to the other).";
-        signinHint.style.display = "none";
-        ppWrap.hidden = false; // Free + signed-in → show payment UI
-        await onPaypalReady().catch(()=>{ /* ignore */ });
-        renderPaypalButtons(user);
+        ppWrap.hidden = true;
+
+        showBottomCta({
+          visible: true,
+          action: 'manage',
+          msg: "You’re on Pro.",
+          sub: "Manage or cancel your subscription on PayPal.",
+          btnText: "Manage on PayPal"
+        });
+
+        return data;
       }
+
+      // Signed in & Free → render PayPal + show “Continue to PayPal”
+      statusEl.className = "pill free";
+      nextBill.textContent = "";
+      setNeutralPlanHint();
+
+      ppWrap.hidden = false; // show PayPal area
+      await onPaypalReady().catch(()=>{});
+      renderPaypalButtons(user);
+
+      showBottomCta({
+        visible: true,
+        action: 'pay',
+        msg: "You’re signed in.",
+        sub: "Click continue to subscribe with PayPal.",
+        btnText: "Continue to PayPal"
+      });
+
       return data;
+
     } catch(e){
       console.error('Status error', e);
       statusEl.textContent = "Status: error while checking";
-      statusEl.className = "pill free";
-      manageLink.hidden = true;
+      statusEl.className   = "pill free";
+      manageLink.hidden    = true;
       nextBill.textContent = "";
-      signinHint.style.display = user ? "none" : "block";
-      planHint.textContent = user ? "We couldn’t fetch your license. You can still subscribe—the license will activate automatically." : "Sign in to continue.";
-      ppWrap.hidden = !user;
+
+      // In error state, keep things actionable
+      planHint.textContent = "Select a plan to continue.";
+      const isSignedIn = !!user;
+      ppWrap.hidden = !isSignedIn;
+      if (isSignedIn) {
+        await onPaypalReady().catch(()=>{});
+        renderPaypalButtons(user);
+        showBottomCta({
+          visible: true,
+          action: 'pay',
+          msg: "You’re signed in.",
+          sub: "Click continue to subscribe with PayPal.",
+          btnText: "Continue to PayPal"
+        });
+      } else {
+        showBottomCta({
+          visible: true,
+          action: 'signin',
+          msg: "Sign in to purchase with PayPal.",
+          sub: "You’ll choose a plan above and pay securely on PayPal.",
+          btnText: "Sign in & continue"
+        });
+      }
       return { plan:'free' };
     }
   }
 
   // Auth handlers
-  signinBtn.onclick  = async () => {
-    try { await signInWithPopup(auth, provider); }
-    catch(e){
-      if (e.code === 'auth/popup-blocked' || e.code === 'auth/cookie-policy'){
-        await signInWithRedirect(auth, provider);
-      } else {
-        alert(`Sign-in failed: ${e.code}`);
-        console.error('signInWithPopup error:', e.code, e.message);
+  if (signinBtn) {
+    signinBtn.onclick = async () => {
+      try { await signInWithPopup(auth, provider); }
+      catch(e){
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/cookie-policy'){
+          await signInWithRedirect(auth, provider);
+        } else {
+          alert(`Sign-in failed: ${e.code}`);
+          console.error('signInWithPopup error:', e.code, e.message);
+        }
       }
-    }
-  };
-  signoutBtn.onclick = () => signOut(auth);
+    };
+  }
+
+  if (signoutBtn) {
+    signoutBtn.onclick = () => signOut(auth);
+  }
 
   refreshLink.onclick = async (e) => {
     e.preventDefault();
@@ -364,21 +453,49 @@
     setPlanDisplay();
 
     if (user){
-      authState.textContent = "Signed in";
-      signinBtn.style.display = "none";
-      signoutBtn.style.display = "inline-block";
-      userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
+      // Top card may be absent
+      if (authState)  authState.textContent = "Signed in";
+      if (signinBtn)  signinBtn.style.display = "none";
+      if (signoutBtn) signoutBtn.style.display = "inline-block";
+      if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
+
       await refreshStatus(user);
     } else {
-      authState.textContent = "Not signed in";
-      signinBtn.style.display = "inline-block";
-      signoutBtn.style.display = "none";
-      userInfo.textContent = "";
-      ppWrap.hidden = true;
-      signinHint.style.display = "block";
+      if (authState)  authState.textContent = "Not signed in";
+      if (signinBtn)  signinBtn.style.display = "inline-block";
+      if (signoutBtn) signoutBtn.style.display = "none";
+      if (userInfo)   userInfo.textContent = "";
+
       await refreshStatus(null);
     }
   });
+
+  // Bottom CTA actions
+  ctaBtn.onclick = async () => {
+    const act = ctaBtn.dataset.action;
+    if (act === 'signin') {
+      try { await signInWithPopup(auth, provider); }
+      catch(e){
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/cookie-policy'){
+          await signInWithRedirect(auth, provider);
+        } else {
+          alert(`Sign-in failed: ${e.code}`);
+          console.error('signIn error:', e);
+        }
+      }
+      return;
+    }
+    if (act === 'manage') {
+      document.getElementById('manageLink').click();
+      return;
+    }
+    if (act === 'pay') {
+      await onPaypalReady().catch(()=>{});
+      renderPaypalButtons(auth.currentUser);
+      document.getElementById('paypal-button-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+  };
 
   // Re-render PayPal buttons if Free & signed in when the plan selection changes
   document.addEventListener('change', async (ev) => {
