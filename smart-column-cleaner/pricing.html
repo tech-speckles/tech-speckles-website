@@ -48,6 +48,61 @@
       display:inline-block; margin-left:6px; opacity:.85;
       transform: translateY(1px);
     }
+    /* Billing country dropdown */
+    #billing-country{
+      display:block;
+      width:100%;
+      max-width:260px;
+      padding:6px 10px;
+      border-radius:8px;
+      border:1px solid var(--border-subtle, #d0d7de);
+      background-color:#fff;
+      font-size:.9rem;
+      line-height:1.3;
+    }
+
+    #billing-country:focus{
+      outline:none;
+      border-color:var(--accent, #0b57d0);
+      box-shadow:0 0 0 2px rgba(11,87,208,.18);
+    }
+
+    /* Notify-me email input */
+    #notify-email{
+      display:block;
+      width:100%;
+      max-width:260px;
+      box-sizing:border-box;
+      margin-top:4px;
+      padding:6px 10px;
+      border-radius:8px;
+      border:1px solid var(--border-subtle, #d0d7de);
+      background-color:#fff;
+      font-size:.9rem;
+      line-height:1.3;
+    }
+
+    #notify-email::placeholder{
+      color:#9ca3af; /* soft grey placeholder */
+    }
+
+    #notify-email:focus{
+      outline:none;
+      border-color:var(--accent, #0b57d0);
+      box-shadow:0 0 0 2px rgba(11,87,208,.18);
+    }
+
+    /* When we mark it read-only after saving */
+    #notify-email[readonly]{
+      background-color:#f6f8fa;
+      color:#4b5563;
+      border-style:dashed;
+    }
+
+    @media (max-width: 640px){
+      #notify-email{ max-width:100%; }
+    }
+
   </style>
 </head>
 <body>
@@ -139,13 +194,62 @@
       <p class="small muted" id="plan-hint" style="margin-top:8px"></p>
     </section>
 
-    <!-- PayPal actions -->
-    <div id="paypal-wrapper" hidden style="margin-top:8px">
-      <div id="paypal-button-container"></div>
-      <p class="muted small" id="post-approve" style="display:none;margin-top:8px">
-        Thanks! Activating your license… this usually takes under a minute. If not updated, click <strong>Refresh</strong>.
+    <!-- Billing country -->
+    <section aria-labelledby="billing-country-title" style="margin-top:10px">
+      <h3 id="billing-country-title" class="small muted" style="margin:0 0 6px">
+        Where do you live?
+      </h3>
+
+      <select id="billing-country">
+        <option value="">Select your country…</option>
+
+        <optgroup label="Commonly selected">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+          <option value="AU">Australia</option>
+          <option value="GB">United Kingdom</option>
+          <option value="IN">India</option>
+        </optgroup>
+
+        <optgroup label="Europe (EU)">
+          <option value="AT">Austria</option>
+          <option value="BE">Belgium</option>
+          <option value="BG">Bulgaria</option>
+          <option value="HR">Croatia</option>
+          <option value="CY">Cyprus</option>
+          <option value="CZ">Czech Republic</option>
+          <option value="DK">Denmark</option>
+          <option value="EE">Estonia</option>
+          <option value="FI">Finland</option>
+          <option value="FR">France</option>
+          <option value="DE">Germany</option>
+          <option value="GR">Greece</option>
+          <option value="HU">Hungary</option>
+          <option value="IE">Ireland</option>
+          <option value="IT">Italy</option>
+          <option value="LV">Latvia</option>
+          <option value="LT">Lithuania</option>
+          <option value="LU">Luxembourg</option>
+          <option value="MT">Malta</option>
+          <option value="NL">Netherlands</option>
+          <option value="PL">Poland</option>
+          <option value="PT">Portugal</option>
+          <option value="RO">Romania</option>
+          <option value="SK">Slovakia</option>
+          <option value="SI">Slovenia</option>
+          <option value="ES">Spain</option>
+          <option value="SE">Sweden</option>
+        </optgroup>
+
+        <optgroup label="Other">
+          <option value="OTHER">Other / not listed</option>
+        </optgroup>
+      </select>
+
+      <p id="country-hint" class="small muted" style="margin-top:6px">
+        We only use this to choose the right billing flow. Your Sheets data is not affected.
       </p>
-    </div>
+    </section>
 
     <!-- Bottom CTA (shows a single clear next step) -->
     <div id="bottom-cta" class="card small" style="margin-top:10px; padding:10px; display:none">
@@ -155,10 +259,36 @@
           <div class="muted" id="cta-sub" style="margin-top:4px">
             You’ll choose a plan above and pay securely on PayPal.
           </div>
+
+          <!-- NEW: notify-me email area (shown only for blocked countries) -->
+          <div id="notify-wrapper" style="margin-top:8px; display:none">
+            <!--label for="notify-email" class="small">
+              Leave your email and we’ll notify you when Pro is available in your country.
+            </label-->
+            <input
+              id="notify-email"
+              type="email"
+              placeholder="you@example.com"
+            />
+            <div id="notify-hint" class="small muted" style="margin-top:4px">
+              We’ll only use this to notify you about Smart Column Cleaner Pro availability.
+            </div>
+          </div>
+          <!-- END notify wrapper -->
+
         </div>
         <button id="cta-btn" class="btn primary" type="button" data-action="signin">Sign in &amp; continue</button>
       </div>
     </div>
+
+    <!-- PayPal actions -->
+    <div id="paypal-wrapper" hidden style="margin-top:8px">
+      <div id="paypal-button-container"></div>
+      <p class="muted small" id="post-approve" style="display:none;margin-top:8px">
+        Thanks! Activating your license… this usually takes under a minute. If not updated, click <strong>Refresh</strong>.
+      </p>
+    </div>
+
   </div>
 </main>
 
@@ -217,15 +347,74 @@
   const planMonthlyRadio = document.getElementById('plan-monthly');
   const planYearlyRadio  = document.getElementById('plan-yearly');
 
+  // Billing country refs
+  const countrySelect = document.getElementById('billing-country');
+  const countryHint   = document.getElementById('country-hint');
+
+  let currentBillingCountry = '';
+
+  function getBillingCountry() {
+    if (!countrySelect) return '';
+    return currentBillingCountry || countrySelect.value || '';
+  }
+
+  // Basic EU list (ISO country codes)
+  const EU_COUNTRIES = new Set([
+    'AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR',
+    'HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK',
+    'SI','ES','SE'
+  ]);
+
+  // Compute region from chosen country
+  function getBillingRegion() {
+    const c = (getBillingCountry() || '').toUpperCase();
+    if (!c) return 'UNKNOWN';
+    if (c === 'GB' || c === 'UK') return 'UK';
+    if (c === 'IN') return 'IN';
+    if (EU_COUNTRIES.has(c)) return 'EU';
+    return 'ROW'; // Rest of world
+  }
+
+  function isBlockedRegion(region) {
+    return region === 'EU' || region === 'UK' || region === 'IN';
+  }
+
+  if (countrySelect) {
+    countrySelect.addEventListener('change', () => {
+      currentBillingCountry = countrySelect.value || '';
+      const region = getBillingRegion();
+      console.log('[SCC pricing] Billing country set to:', currentBillingCountry || '(none)', '→ region:', region);
+      // Re-evaluate status whenever country changes
+      const user = auth.currentUser || null;
+      refreshStatus(user).catch(err => {
+        console.error('[SCC pricing] refreshStatus failed after country change:', err);
+      });
+    });
+  }
+
   // Bottom CTA refs
   const bottomCta  = document.getElementById('bottom-cta');
   const ctaMsg     = document.getElementById('cta-msg');
   const ctaSub     = document.getElementById('cta-sub');
   const ctaBtn     = document.getElementById('cta-btn');
 
-  // Functions URL
-  const GET_LICENSE_URL = "https://getlicense-2dsvjh67hq-uc.a.run.app";
+  // NEW: notify-me refs
+  const notifyWrapper    = document.getElementById('notify-wrapper');
+  const notifyEmailInput = document.getElementById('notify-email');
+  const notifyHint       = document.getElementById('notify-hint');
 
+  function getNotifyEmail(user) {
+    // Prefer what user typed, fall back to signed-in email
+    if (notifyEmailInput && notifyEmailInput.value && notifyEmailInput.value.trim()) {
+      return notifyEmailInput.value.trim();
+    }
+    if (user && user.email) return user.email;
+    return '';
+  }
+
+  // Functions URL
+  const GET_LICENSE_URL  = "https://getlicense-2dsvjh67hq-uc.a.run.app";
+  const LOG_INTEREST_URL = "https://us-central1-smart-column-cleaner.cloudfunctions.net/logPurchaseInterest";
   // LIVE plan IDs
   const PLAN_ID_MONTHLY = 'P-84T73598XH0604549NDLXLII';
   const PLAN_ID_YEARLY  = 'P-1HR93549KG238334SNDQTFCQ';
@@ -329,16 +518,29 @@
   function showBottomCta({ visible, action, msg, sub, btnText }){
     bottomCta.style.display = visible ? 'block' : 'none';
     if (!visible) return;
-    ctaBtn.dataset.action = action;     // 'signin' | 'pay' | 'manage'
-    // Add a small lock icon when proceeding to PayPal
-    if (action === 'pay') {
-      ctaBtn.innerHTML = (btnText || 'Continue to PayPal') + ' <span class="icon-lock" aria-hidden="true">🔒</span>';
+
+    const isPay    = action === 'pay';
+    const isNotify = action === 'notify';
+
+    ctaBtn.dataset.action = action;     // 'signin' | 'pay' | 'manage' | 'notify'
+
+    // Button label
+    if (isPay) {
+      ctaBtn.innerHTML = (btnText || 'Continue to PayPal') +
+        ' <span class="icon-lock" aria-hidden="true">🔒</span>';
     } else {
-      ctaBtn.textContent = btnText || 'Continue';
+      ctaBtn.textContent = btnText || (isNotify ? 'Notify me' : 'Continue');
     }
-    ctaMsg.textContent    = msg || '';
-    ctaSub.textContent    = sub || '';
+
+    ctaMsg.textContent = msg || '';
+    ctaSub.textContent = sub || '';
+
+    // Show/hide notify area
+    if (notifyWrapper) {
+      notifyWrapper.style.display = isNotify ? 'block' : 'none';
+    }
   }
+
 
   async function refreshStatus(user){
     try{
@@ -350,25 +552,59 @@
           : `Select a plan to continue.`;
       };
 
+      const country    = (typeof getBillingCountry === 'function') ? getBillingCountry() : '';
+      const hasCountry = !!country;
+      const region     = hasCountry ? getBillingRegion() : 'UNKNOWN';
+      const blocked    = hasCountry && isBlockedRegion(region);
+
+      console.log('[SCC pricing] refreshStatus country:', country || '(none)', 'region:', region, 'blocked:', blocked);
+
       if (!user){
-        // Not signed in → clear single CTA
+        // Signed in & Free
         statusEl.textContent = "Status: free (not signed in)";
-        statusEl.className   = "pill free";
-        manageLink.hidden    = true;
+        statusEl.className = "pill free";
         nextBill.textContent = "";
         setNeutralPlanHint();
 
-        ppWrap.hidden = true; // hide PayPal buttons
-        showBottomCta({
-          visible: true,
-          action: 'signin',
-          msg: "Sign in to purchase with PayPal.",
-          sub: "You’ll choose a plan above and pay securely on PayPal.",
-          btnText: "Sign in & continue"
-        });
+        if (!hasCountry) {
+          // Country not selected yet → hide PayPal and ask for country
+          ppWrap.hidden = true;
+          showBottomCta({
+            visible: true,
+            action: 'country',
+            msg: "Select your country to continue.",
+            sub: "We only use this to choose the right billing flow. Your Sheets data is not affected.",
+            btnText: "Select your country"
+          });
+        } else if (blocked) {
+          // Blocked regions: no PayPal, show notify CTA
+          ppWrap.hidden = true;
+          showBottomCta({
+            visible: true,
+            action: 'signin',
+            msg: "Pro purchases aren’t available in your country yet.",
+            sub: "Leave your email below and we’ll notify you when billing is ready for your country.",
+            btnText: "Sign in & notify me"
+          });
+        } else {
+          // Allowed regions: normal PayPal flow
+          ppWrap.hidden = false;
+          await onPaypalReady().catch(()=>{});
+          renderPaypalButtons(user);
+
+          showBottomCta({
+            visible: true,
+            action: 'signin',
+            msg: "Sign in to purchase with PayPal.",
+            sub: "You’ll choose a plan above and pay securely on PayPal.",
+            btnText: "Sign in & continue"
+          });
+        }
 
         return { plan:'free' };
+
       }
+
 
       // Signed in → check license
       const data    = await fetchLicense(user);
@@ -382,41 +618,65 @@
         // Already Pro
         statusEl.className   = "pill pro";
         manageLink.hidden    = false;
-        nextBill.textContent = data.periodEnd ? `Next bill: ${new Date(data.periodEnd).toLocaleDateString()} (local time)` : "";
+        nextBill.textContent = data.periodEnd
+          ? `Next bill: ${new Date(data.periodEnd).toLocaleDateString()} (local time)`
+          : "";
 
         planHint.textContent = "Already Pro. To change plans, cancel in PayPal, then subscribe to the other plan.";
+        // Blocked regions: no PayPal, show notify CTA
         ppWrap.hidden = true;
-
         showBottomCta({
           visible: true,
-          action: 'manage',
-          msg: "You’re on Pro.",
-          sub: "Manage or cancel your subscription on PayPal.",
-          btnText: "Manage on PayPal"
+          action: 'notify',
+          msg: "Pro purchases aren’t available in your country yet.",
+          sub: "Leave your email below and we’ll notify you when billing is ready for your country.",
+          btnText: "Notify me"
         });
-
         return data;
       }
 
-      // Signed in & Free → render PayPal + show “Continue to PayPal”
+      // Signed in & Free
       statusEl.className = "pill free";
       nextBill.textContent = "";
       setNeutralPlanHint();
 
-      ppWrap.hidden = false; // show PayPal area
-      await onPaypalReady().catch(()=>{});
-      renderPaypalButtons(user);
+      if (!hasCountry) {
+        // Country not selected yet → require it before anything else
+        ppWrap.hidden = true;
+        showBottomCta({
+          visible: true,
+          action: 'country',
+          msg: "Select your country to continue.",
+          sub: "We only use this to choose the right billing flow. Your Sheets data is not affected.",
+          btnText: "Select your country"
+        });
+      } else if (blocked) {
+        // Blocked regions: no PayPal, show info-only CTA
+        ppWrap.hidden = true;
+        showBottomCta({
+          visible: true,
+          action: 'notify',
+          msg: "Pro purchases aren’t available in your country yet.",
+          sub: "Leave your email below and we’ll notify you when billing is ready for your country.",
+          btnText: "Notify me"
+        });
+      } else {
+        // Allowed regions: normal PayPal flow
+        ppWrap.hidden = false;
+        await onPaypalReady().catch(()=>{});
+        renderPaypalButtons(user);
 
-      showBottomCta({
-        visible: true,
-        action: 'pay',
-        msg: "You’re signed in.",
-        sub: "Click continue to subscribe with PayPal.",
-        btnText: "Continue to PayPal"
-      });
+        showBottomCta({
+          visible: true,
+          action: 'pay',
+          msg: "You’re signed in.",
+          sub: "Click continue to subscribe with PayPal.",
+          btnText: "Continue to PayPal"
+        });
+      }
 
-      return data;
-
+      return { plan:'free' };
+ 
     } catch(e){
       console.error('Status error', e);
       statusEl.textContent = "Status: error while checking";
@@ -487,12 +747,17 @@
       // if (userInfo)   userInfo.textContent = `${user.displayName || user.email} — uid: ${user.uid}`;
       renderUserInfo(user, { showUid: false });
 
+      if (notifyEmailInput && !notifyEmailInput.value) {
+        notifyEmailInput.value = user.email || '';
+      }
       await refreshStatus(user);
     } else {
       if (authState)  authState.textContent = "Not signed in";
       if (signinBtn)  signinBtn.style.display = "inline-block";
       if (signoutBtn) signoutBtn.style.display = "none";
       if (userInfo)   userInfo.textContent = "";
+
+      if (notifyEmailInput) notifyEmailInput.value = '';
 
       await refreshStatus(null);
     }
@@ -520,9 +785,106 @@
     if (act === 'pay') {
       await onPaypalReady().catch(()=>{});
       renderPaypalButtons(auth.currentUser);
-      document.getElementById('paypal-button-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('paypal-button-container')
+        .scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    if (act === 'unsupported') {
+      alert("Pro purchases are not available in your country yet. Please check back soon.");
+      return;
+    }
+
+    if (act === 'country') {
+      if (countrySelect) {
+        countrySelect.focus();
+        countrySelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
+    if (act === 'notify') {
+      const user = auth.currentUser || null;
+      if (!user) {
+        // Should not happen because we gate notify by sign-in,
+        // but guard just in case.
+        alert("Please sign in with Google first, then try again.");
+        return;
+      }
+
+      const email = getNotifyEmail(user);
+      if (!email || !email.includes('@')) {
+        alert("Please enter a valid email address so we can notify you.");
+        if (notifyEmailInput) notifyEmailInput.focus();
+        return;
+      }
+
+      const country = (typeof getBillingCountry === 'function')
+        ? getBillingCountry()
+        : null;
+      const region  = (typeof getBillingRegion === 'function')
+        ? getBillingRegion()
+        : null;
+
+      if (!country) {
+        alert("Please select your country so we can log your request correctly.");
+        if (countrySelect) countrySelect.focus();
+        return;
+      }
+
+      // Disable button to prevent double-clicks
+      ctaBtn.disabled = true;
+      ctaBtn.textContent = "Saving…";
+
+      try {
+        const idToken = await user.getIdToken(/* forceRefresh */ true);
+
+        const body = {
+          email,
+          country,
+          region,
+          reason: "blocked_billing_country_phase1",
+          source: "pricing_page"
+        };
+
+        const resp = await fetch(LOG_INTEREST_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (!resp.ok) {
+          const text = await resp.text().catch(() => "");
+          console.error("logPurchaseInterest failed", resp.status, text);
+          alert("Sorry, we couldn’t save your request right now. Please try again in a moment.");
+          return;
+        }
+
+        console.log("[SCC pricing] Notify-me logged", { email, country, region });
+
+        // Soft-lock the UI – user has already been logged
+        if (notifyEmailInput) {
+          notifyEmailInput.readOnly = true;
+        }
+        if (notifyHint) {
+          notifyHint.textContent = "Thanks! We’ll email you when Smart Column Cleaner Pro is available in your country.";
+        }
+        ctaBtn.textContent = "Saved";
+        alert("Thanks! We’ll notify you when Pro is available in your country.");
+
+      } catch (err) {
+        console.error("notify → logPurchaseInterest error", err);
+        alert("Something went wrong while saving your request. Please try again.");
+      } finally {
+        // Re-enable button (even after success, in case you want further clicks)
+        ctaBtn.disabled = false;
+      }
+
+      return;
+    }
+
   };
 
   // Re-render PayPal buttons if Free & signed in when the plan selection changes
