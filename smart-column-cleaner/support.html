@@ -13,6 +13,9 @@
   <meta property="og:description" content="Email support, report issues, and read docs." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#14B8A6" />
+
+  <!-- Google reCAPTCHA v2 (checkbox) -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -21,8 +24,8 @@
   <div class="wrap brand">
     <a href="/" aria-label="Back to Tech Speckles home" class="brand-link" style="display:flex;align-items:center;gap:10px;text-decoration:none">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="color: var(--accent)">
-        <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".12"/>
-        <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="10" fill="currentColor" opacity=".12"></circle>
+        <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
       <h1>Tech Speckles</h1>
     </a>
@@ -43,16 +46,107 @@
     <span class="sep">/</span>
     <span aria-current="page">Support</span>
   </nav>
+
   <h1>Smart Column Cleaner — Support</h1>
 
-  <p>We’re happy to help.</p>
+  <p>We’re happy to help with questions, issues, and feedback.</p>
   <ul>
     <li>Email: <a href="mailto:support@techspeckles.com">support@techspeckles.com</a></li>
-    <li>Report a bug / request a feature: <a href="/smart-column-cleaner/report-issue.html">Report issue</a></li>
-    <li>User guide: <a href="/smart-column-cleaner/help.html">Help & FAQ</a></li>
+    <li>User guide: <a href="/smart-column-cleaner/help.html">Help &amp; FAQ</a></li>
   </ul>
 
-  <p class="note"><span class="muted">Tip:</span> Including a small sample sheet or exact steps helps us reproduce issues faster.</p>
+  <p class="note">
+    <span class="muted">Tip:</span>
+    Including exact steps (and a small screenshot if possible) helps us understand and fix issues faster.
+  </p>
+
+  <section aria-labelledby="support-form-heading" class="support-section">
+    <h2 id="support-form-heading">Contact Smart Column Cleaner support</h2>
+    <p>
+      Use this form to contact Smart Column Cleaner support. We’ll reply to you by email, usually within a reasonable time.
+    </p>
+
+    <!-- Success and error messages -->
+    <div id="support-success" class="alert alert-success" style="display:none;" role="status" aria-live="polite"></div>
+    <div
+      id="support-error"
+      class="alert alert-error"
+      style="display:none;"
+      role="alert"
+      aria-live="polite"
+      tabindex="-1"
+    ></div>
+
+
+    <form id="support-form" novalidate>
+      <div class="field">
+        <label for="support-email">Your email address</label>
+        <input
+          id="support-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          placeholder="you@example.com"
+        />
+        <p class="field-help">We’ll send our reply and acknowledgement to this address.</p>
+      </div>
+
+      <div class="field">
+        <label for="support-subject">Subject</label>
+        <input
+          id="support-subject"
+          name="subject"
+          type="text"
+          required
+          maxlength="150"
+          placeholder="Issue while using Trim Spaces tool"
+        />
+      </div>
+
+      <div class="field">
+        <label for="support-message">Message</label>
+        <textarea
+          id="support-message"
+          name="message"
+          required
+          rows="6"
+          placeholder="Please describe what you were trying to do, what you expected, and what actually happened."
+        ></textarea>
+      </div>
+
+      <!--div class="field">
+        <label for="support-attachment">Attach a screenshot (optional)</label>
+        <input
+          id="support-attachment"
+          name="attachment"
+          type="file"
+          accept=".png,.jpg,.jpeg,.gif,.pdf"
+        />
+        <p class="field-help">Remove any personal or sensitive data before uploading.</p>
+      </div-->
+
+      <!-- CAPTCHA widget -->
+      <div class="field">
+        <label class="muted" for="support-captcha">Verification</label>
+        <div
+          id="support-captcha"
+          class="g-recaptcha captcha-placeholder"
+          data-sitekey="6Ld5iD4sAAAAACiAAk4SH422CdE9gwf4XDwfIQlz"
+          aria-label="CAPTCHA verification"
+        ></div>
+      </div>
+
+      <p class="small">
+        We will use this information only to respond to your Smart Column Cleaner support request.
+        Please avoid sharing personal or sensitive data in your message or attachments.
+      </p>
+
+      <button type="submit" id="support-submit">
+        Send to Smart Column Cleaner support
+      </button>
+    </form>
+  </section>
 </main>
 
 <footer>
@@ -62,6 +156,130 @@
     <a href="/smart-column-cleaner/tos.html">Terms</a>
   </div>
 </footer>
-<script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+
+<script>
+  // Footer year
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  const SUPPORT_ENDPOINT = 'https://us-central1-smart-column-cleaner.cloudfunctions.net/supportContact';
+
+  const form = document.getElementById('support-form');
+  const successBox = document.getElementById('support-success');
+  const errorBox = document.getElementById('support-error');
+  const submitBtn = document.getElementById('support-submit');
+
+  function showSuccess(message) {
+    successBox.textContent = message;
+    successBox.style.display = 'block';
+    errorBox.style.display = 'none';
+    successBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    successBox.focus();
+  }
+
+  function showError(message) {
+    errorBox.textContent = message;
+    errorBox.style.display = 'block';
+    successBox.style.display = 'none';
+    // Bring the error into view and focus it
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    errorBox.focus();
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    // Clear previous messages
+    successBox.style.display = 'none';
+    errorBox.style.display = 'none';
+
+    // Basic browser validation
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // Check that reCAPTCHA is loaded
+    if (typeof grecaptcha === 'undefined') {
+      showError('Verification widget did not load. Please refresh the page and try again.');
+      return;
+    }
+
+    // Get reCAPTCHA response token
+    const captchaToken = grecaptcha.getResponse();
+    if (!captchaToken) {
+      showError('Please tick the “I’m not a robot” box before sending your request.');
+      return;
+    }
+
+    const email = document.getElementById('support-email').value.trim();
+    const subject = document.getElementById('support-subject').value.trim();
+    const message = document.getElementById('support-message').value.trim();
+    // Note: attachment will be handled later (Phase 2) via a different mechanism.
+    const attachmentInput = document.getElementById('support-attachment');
+    const hasAttachment = attachmentInput && attachmentInput.files && attachmentInput.files.length > 0;
+
+    const payload = {
+      userEmail: email,
+      subject,
+      message,
+      captchaToken,
+      attachmentInfo: hasAttachment ? { hasFile: true } : null,
+      meta: {
+        pageUrl: window.location.href,
+        userAgent: window.navigator.userAgent,
+        language: window.navigator.language || 'en'
+      }
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    try {
+      const resp = await fetch(SUPPORT_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      let data;
+      try {
+        data = await resp.json();
+      } catch (e) {
+        console.error('Failed to parse JSON response from support endpoint', e);
+        throw new Error('Invalid response from support server.');
+      }
+
+      if (!resp.ok || !data || data.ok !== true) {
+        console.error('Support endpoint returned error', resp.status, data);
+        const msg =
+          (data && data.message) ||
+          'Something went wrong while sending your request. Please try again in a moment.';
+        showError(msg);
+        return;
+      }
+
+      const ticketId = data.ticketId || 'N/A';
+
+      showSuccess(
+        `Your request has been submitted. Your ticket ID is ${ticketId}. We’ll reply to you by email shortly.`
+      );
+
+      // Clear form and reset CAPTCHA
+      form.reset();
+      grecaptcha.reset();
+    } catch (err) {
+      console.error('Error submitting support request', err);
+      showError('We could not reach the support server. Please check your connection and try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send to Smart Column Cleaner support';
+    }
+  }
+
+  form.addEventListener('submit', handleSubmit);
+</script>
+
 </body>
 </html>

@@ -8,3 +8,108 @@
   border-radius: 10px;
   display: block;
 }
+
+/* ==== Smart Column Cleaner – Support form styles ==== */
+/* Support form layout */
+.support-section {
+  margin-top: 2rem;
+  max-width: 640px;
+}
+
+/* Space between fields */
+.support-section .field {
+  margin-bottom: 1.25rem;
+}
+
+/* Labels */
+.support-section label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+/* Help text below fields */
+.support-section .field-help,
+.support-section .small,
+.support-section .muted {
+  font-size: 0.875rem;
+  color: var(--text-muted, #6b7280);
+  margin-top: 0.25rem;
+}
+
+/* Inputs, textareas, file input */
+.support-section input[type="email"],
+.support-section input[type="text"],
+.support-section textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font: inherit;
+}
+
+.support-section input[type="file"] {
+  font-size: 0.9rem;
+}
+
+/* Focus state */
+.support-section input:focus,
+.support-section textarea:focus {
+  outline: none;
+  border-color: var(--accent, #14b8a6);
+  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.25);
+}
+
+/* Alerts for success/error */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* CAPTCHA placeholder */
+.captcha-placeholder {
+  min-height: 0;
+  border: none;
+  padding: 0;
+  display: inline-block;       /* no flex centering */
+}
+
+
+/* Submit button */
+#support-submit {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 4px;
+  border: none;
+  background: var(--accent, #14b8a6);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#support-submit:hover {
+  filter: brightness(0.95);
+}
+
+#support-submit:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
