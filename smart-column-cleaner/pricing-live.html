@@ -611,16 +611,29 @@
       const plan    = String(data.plan || 'free').toLowerCase();   // 'free' | 'pro'
       const cadence = String(data.planCadence || '').toLowerCase();
       const statusTxt = data.status || (plan === 'free' ? 'free' : 'active');
+      const isComplimentary = String(statusTxt).toUpperCase() === 'COMPLIMENTARY' ||
+        data.entitlementSource === 'complimentary';
       const labelCad  = cadence ? ` — Pro (${cadence[0].toUpperCase()}${cadence.slice(1)})` : (plan !== 'free' ? ' — Pro' : '');
       statusEl.textContent = `Status: ${statusTxt}${labelCad}`;
 
       if (plan !== 'free'){
         // Already Pro
         statusEl.className   = "pill pro";
-        manageLink.hidden    = false;
-        nextBill.textContent = data.periodEnd
-          ? `Next bill: ${new Date(data.periodEnd).toLocaleDateString()} (local time)`
-          : "";
+        manageLink.hidden    = isComplimentary;
+        nextBill.textContent = isComplimentary
+          ? (data.periodEnd
+              ? `Complimentary access ends ${new Date(data.periodEnd).toLocaleDateString()} (local time). No payment method or automatic renewal.`
+              : "Complimentary Pro access. No payment method or automatic renewal.")
+          : (data.periodEnd
+              ? `Next bill: ${new Date(data.periodEnd).toLocaleDateString()} (local time)`
+              : "");
+
+        if (isComplimentary) {
+          planHint.textContent = "Your complimentary Pro access is active.";
+          ppWrap.hidden = true;
+          showBottomCta({ visible: false });
+          return data;
+        }
 
         planHint.textContent = "Already Pro. To change plans, cancel in PayPal, then subscribe to the other plan.";
         // Blocked regions: no PayPal, show notify CTA
@@ -637,6 +650,7 @@
 
       // Signed in & Free
       statusEl.className = "pill free";
+      manageLink.hidden = true;
       nextBill.textContent = "";
       setNeutralPlanHint();
 
