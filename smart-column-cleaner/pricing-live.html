@@ -165,12 +165,12 @@
 
     <ul class="small" style="margin-top:12px">
       <li>Pro = <strong>Unlimited cells</strong> (Free is 300/day).</li>
-      <li>Cancel anytime in PayPal; access continues until the end of your paid period + grace.</li>
+      <li id="paypal-cancellation-note">Cancel anytime in PayPal; access continues until the end of your paid period + grace.</li>
       <li>No sheet data leaves your Google account.</li>
     </ul>
 
     <!-- Plan chooser -->
-    <section aria-labelledby="choose-plan-title" style="margin-top:8px">
+    <section id="plan-chooser" aria-labelledby="choose-plan-title" style="margin-top:8px">
       <h3 id="choose-plan-title" class="small muted" style="margin:0 0 6px">Choose your plan</h3>
 
       <div class="plans" role="radiogroup" aria-label="Plans">
@@ -195,7 +195,7 @@
     </section>
 
     <!-- Billing country -->
-    <section aria-labelledby="billing-country-title" style="margin-top:10px">
+    <section id="billing-country-section" aria-labelledby="billing-country-title" style="margin-top:10px">
       <h3 id="billing-country-title" class="small muted" style="margin:0 0 6px">
         Where do you live?
       </h3>
@@ -337,6 +337,9 @@
   const ppWrap      = document.getElementById('paypal-wrapper');
   const postApprove = document.getElementById('post-approve');
   const paypalContainer = document.getElementById('paypal-button-container');
+  const planChooser = document.getElementById('plan-chooser');
+  const billingCountrySection = document.getElementById('billing-country-section');
+  const paypalCancellationNote = document.getElementById('paypal-cancellation-note');
 
   const pMonth = document.getElementById('p-month');
   const pYear  = document.getElementById('p-year');
@@ -472,6 +475,12 @@
     pMonthNote.title = "Billed monthly";
   }
 
+  function setPurchaseOptionsVisible(visible) {
+    planChooser.hidden = !visible;
+    billingCountrySection.hidden = !visible;
+    paypalCancellationNote.hidden = !visible;
+  }
+
   async function onPaypalReady(maxWaitMs = 6000){
     if (window.paypal) return;
     const start = Date.now();
@@ -544,6 +553,9 @@
 
   async function refreshStatus(user){
     try{
+      // Reset purchase controls before rendering the current account state.
+      setPurchaseOptionsVisible(true);
+
       // Always show a neutral plan hint (no mixed sign-in text)
       const setNeutralPlanHint = () => {
         const { pct } = computeYearlySavings(PRICE_MONTHLY, PRICE_YEARLY);
@@ -630,6 +642,7 @@
 
         if (isComplimentary) {
           planHint.textContent = "Your complimentary Pro access is active.";
+          setPurchaseOptionsVisible(false);
           ppWrap.hidden = true;
           showBottomCta({ visible: false });
           return data;
